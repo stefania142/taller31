@@ -8,11 +8,19 @@ const escenas = [
 
     {x1:150, y1:150, x2:350, y2:250},
     {x1:20, y1:20, x2:80, y2:60},
-    {x1:50, y1:200, x2:250, y2:220}
+    {x1:50, y1:200, x2:250, y2:220},
+    {x1:200, y1:50, x2:250, y2:250},
+    {x1:50, y1:50, x2:500, y2:350}
 
 ];
 
 let escenaActual = 0;
+
+const botonSiguiente = document.querySelectorAll("button")[0];
+const botonAnterior = document.querySelectorAll("button")[1];
+
+botonSiguiente.addEventListener("click", siguienteEscena);
+botonAnterior.addEventListener("click", anteriorEscena);
 
 function convertirY(y){
     return canvas.height - y;
@@ -66,4 +74,42 @@ dibujarViewport();
 const linea = escenas[escenaActual];
 
 dibujarLinea(linea.x1, linea.y1, linea.x2, linea.y2);
+
+function renderizar(){
+
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    dibujarViewport();
+
+    const linea = escenas[escenaActual];
+
+    dibujarLinea(linea.x1, linea.y1, linea.x2, linea.y2);
+}
+
+
+function siguienteEscena(){
+
+    escenaActual++;
+
+    if(escenaActual >= escenas.length){
+        escenaActual = 0;
+    }
+
+    renderizar();
+}
+
+
+function anteriorEscena(){
+
+    escenaActual--;
+
+    if(escenaActual < 0){
+        escenaActual = escenas.length - 1;
+    }
+
+    renderizar();
+}
+
+
+renderizar();
 
