@@ -6,14 +6,12 @@ console.log(canvas);
 
 const escenas = [
 
-    {x1:150, y1:150, x2:350, y2:250},
-    {x1:20, y1:20, x2:80, y2:60},
-    {x1:50, y1:200, x2:250, y2:220},
-    {x1:200, y1:50, x2:250, y2:250},
-    {x1:50, y1:50, x2:500, y2:350},
-    {x1:50, y1:50, x2:100, y2:100},
-    {x1:250, y1:50, x2:250, y2:400},
-
+    {x1:150, y1:150, x2:320, y2:250}, // dentro del viewport
+    {x1:200, y1:20, x2:80, y2:60}, // fuera del viewport
+    {x1:50, y1:200, x2:250, y2:220}, // parcialmente dentro del viewport
+    {x1:50, y1:50, x2:100, y2:100}, //tocando una sola punta del viewport
+    {x1:250, y1:50, x2:250, y2:400}, // vertical sobre le view port
+    
 ];
 
 const INSIDE = 0;
@@ -77,34 +75,101 @@ function dibujarViewport(){
 }
 dibujarViewport();
 
-function obtenerCodigo(x, y){
+function obtenerCodigo(x, y, xmin, ymin, xmax, ymax){
 
     let codigo = INSIDE;
 
-    if(x < 100){
+    if(x < xmin){
         codigo |= LEFT;
     }
 
-    else if(x > 400){
+    else if(x > xmax){
         codigo |= RIGHT;
     }
 
-    if(y < 100){
+    if(y < ymin){
         codigo |= BOTTOM;
     }
 
-    else if(y > 300){
+    else if(y > ymax){
         codigo |= TOP;
     }
 
     return codigo;
 }
-function cohenSutherland(x1, y1, x2, y2){
+function cohenSutherland(x1,y1,x2,y2,xmin,ymin,xmax,ymax){
 
-    let codigo1 = obtenerCodigo(x1,y1);
-    let codigo2 = obtenerCodigo(x2,y2);
 
-    console.log(codigo1, codigo2);
+    let codigo1 = obtenerCodigo(x1,y1,x2,y2,xmin,ymin,xmax,ymax);
+    let codigo2 = obtenerCodigo(x2,y2,x2,y2,xmin,ymin,xmax,ymax);
+
+    let aceptar = false;
+
+    while(true){
+
+        if((codigo1 | codigo2) === 0){
+
+            aceptar = true;
+            break;
+        }
+
+        else if((codigo1 & codigo2) !== 0){
+
+            break;
+        }
+
+        else{
+
+            let x, y;
+
+            let codigoFuera = codigo1 !== 0 ? codigo1 : codigo2;
+
+            if(codigoFuera & TOP){
+
+                x = x1 + (x2 - x1) * (ymax - y1) / (y2 - y1);
+                y = ymax;
+            }
+
+            else if(codigoFuera & BOTTOM){
+
+                x = x1 + (x2 - x1) * (ymin - y1) / (y2 - y1);
+                y = ymin;
+            }
+
+            else if(codigoFuera & RIGHT){
+
+                y = y1 + (y2 - y1) * (xmax - x1) / (x2 - x1);
+                x = xmax;
+            }
+
+            else if(codigoFuera & LEFT){
+
+                y = y1 + (y2 - y1) * (xmin - x1) / (x2 - x1);
+                x = xmin;
+            }
+
+            if(codigoFuera === codigo1){
+
+                x1 = x;
+                y1 = y;
+
+                codigo1 = obtenerCodigo(x1,y1,xmin,ymin,xmax,ymax);
+            }
+
+            else{
+
+                x2 = x;
+                y2 = y;
+
+                codigo2 = obtenerCodigo(x2,y2,xmin,ymin,xmax,ymax);
+            }
+        }
+    }
+
+    if(aceptar){
+
+        dibujarLinea(x1,y1,x2,y2);
+    }
 }
 
 const linea = escenas[escenaActual];
@@ -115,7 +180,7 @@ function renderizar(){
 
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
-    dibujarViewport();
+    dibujarViewport(xmin, ymin, xmax, ymax);
 
     const linea = escenas[escenaActual];
 
@@ -134,7 +199,6 @@ function siguienteEscena(){
     renderizar();
 }
 
-
 function anteriorEscena(){
 
     escenaActual--;
@@ -148,10 +212,10 @@ function anteriorEscena(){
 
 renderizar();
 
-dibujarLinea(linea.x1, linea.y1, linea.x2, linea.y2);
+//dibujarLinea(linea.x1, linea.y1, linea.x2, linea.y2);
 cohenSutherland(
     linea.x1,
     linea.y1,
     linea.x2,
-    linea.y2
+    linea.y2,
 );
