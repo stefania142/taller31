@@ -11,7 +11,7 @@ const escenas = [
     {x1:50, y1:200, x2:250, y2:220}, // parcialmente dentro del viewport
     {x1:50, y1:50, x2:100, y2:100}, //tocando una sola punta del viewport
     {x1:250, y1:50, x2:250, y2:400}, // vertical sobre le view port
-    
+    {x1:50, y1:50, x2:450, y2:350}
 ];
 
 const INSIDE = 0;
@@ -61,12 +61,14 @@ function dibujarLinea(x1, y1, x2, y2, color = "black"){
 }
 function dibujarViewport(xmin, ymin, xmax, ymax){
 
-    dibujarLinea(100,100,400,100,"blue");
-    dibujarLinea(400,100,400,300,"blue");
-    dibujarLinea(400,300,100,300,"blue");
-    dibujarLinea(100,300,100,100,"blue");
+    dibujarLinea(xmin, ymin, xmax, ymin, "blue");
+
+    dibujarLinea(xmax, ymin, xmax, ymax, "blue");
+
+    dibujarLinea(xmax, ymax, xmin, ymax, "blue");
+
+    dibujarLinea(xmin, ymax, xmin, ymin, "blue");
 }
-dibujarViewport();
 
 function obtenerCodigo(x, y, xmin, ymin, xmax, ymax){
 
@@ -95,15 +97,11 @@ function cohenSutherland(x1,y1,x2,y2,xmin,ymin,xmax,ymax){
     let codigo1 = obtenerCodigo(
         x1,
         y1,
-        x2,
-        y2,
         xmin,
         ymin,
         xmax,
         ymax);
     let codigo2 = obtenerCodigo(
-        x2,
-        y2,
         x2,
         y2,
         xmin,
@@ -178,6 +176,23 @@ function cohenSutherland(x1,y1,x2,y2,xmin,ymin,xmax,ymax){
     if(aceptar){
 
         dibujarLinea(x1,y1,x2,y2,"red");
+        document.getElementById("infoRecorte").innerHTML =
+
+        `
+        <b>Línea recortada</b><br>
+        P1 = (${Math.round(x1)}, ${Math.round(y1)})<br>
+        P2 = (${Math.round(x2)}, ${Math.round(y2)})
+        `;
+}
+
+else{
+
+        document.getElementById("infoRecorte").innerHTML =
+
+        `
+        <b>Línea recortada</b><br>
+        No visible
+        `;
     }
 }
 
@@ -211,6 +226,13 @@ function renderizar(){
 
         //obtener escena actual
     const linea = escenas[escenaActual];
+    document.getElementById("infoLinea").innerHTML =
+
+    `
+    <b>Línea original</b><br>
+    P1 = (${linea.x1}, ${linea.y1})<br>
+    P2 = (${linea.x2}, ${linea.y2})
+    `;
     // dibujar linea original
     dibujarLinea(linea.x1, linea.y1, linea.x2, linea.y2, "gray");
 
