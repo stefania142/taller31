@@ -32,20 +32,13 @@ function convertirY(y){
     return canvas.height - y;
 }
 
-function plot(x, y){
-
+function plot(x, y, color = "black"){
+    ctx.fillStyle = color;
     ctx.fillRect(x, convertirY(y), 2, 2);
 }
 
-// dibujar pixel
-function plot(x, y){
-
-    ctx.fillRect(x, y, 2, 2);
-}
-
-
 // algoritmo DDA
-function dibujarLinea(x1, y1, x2, y2){
+function dibujarLinea(x1, y1, x2, y2, color = "black"){
 
     let dx = x2 - x1;
     let dy = y2 - y1;
@@ -60,18 +53,18 @@ function dibujarLinea(x1, y1, x2, y2){
 
     for(let i = 0; i <= pasos; i++){
 
-        plot(Math.round(x), Math.round(y));
+        plot(Math.round(x), Math.round(y), color);
 
         x += xinc;
         y += yinc;
     }
 }
-function dibujarViewport(){
+function dibujarViewport(xmin, ymin, xmax, ymax){
 
-    dibujarLinea(100,100,400,100);
-    dibujarLinea(400,100,400,300);
-    dibujarLinea(400,300,100,300);
-    dibujarLinea(100,300,100,100);
+    dibujarLinea(100,100,400,100,"blue");
+    dibujarLinea(400,100,400,300,"blue");
+    dibujarLinea(400,300,100,300,"blue");
+    dibujarLinea(100,300,100,100,"blue");
 }
 dibujarViewport();
 
@@ -99,9 +92,25 @@ function obtenerCodigo(x, y, xmin, ymin, xmax, ymax){
 }
 function cohenSutherland(x1,y1,x2,y2,xmin,ymin,xmax,ymax){
 
-
-    let codigo1 = obtenerCodigo(x1,y1,x2,y2,xmin,ymin,xmax,ymax);
-    let codigo2 = obtenerCodigo(x2,y2,x2,y2,xmin,ymin,xmax,ymax);
+    let codigo1 = obtenerCodigo(
+        x1,
+        y1,
+        x2,
+        y2,
+        xmin,
+        ymin,
+        xmax,
+        ymax);
+    let codigo2 = obtenerCodigo(
+        x2,
+        y2,
+        x2,
+        y2,
+        xmin,
+        ymin,
+        xmax,
+        ymax
+    );
 
     let aceptar = false;
 
@@ -168,7 +177,7 @@ function cohenSutherland(x1,y1,x2,y2,xmin,ymin,xmax,ymax){
 
     if(aceptar){
 
-        dibujarLinea(x1,y1,x2,y2);
+        dibujarLinea(x1,y1,x2,y2,"red");
     }
 }
 
@@ -180,11 +189,42 @@ function renderizar(){
 
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
-    dibujarViewport(xmin, ymin, xmax, ymax);
+    // leer viewport desde inputs
+    const xmin =
+    parseInt(document.getElementById("xmin").value);
 
+    const ymin =
+    parseInt(document.getElementById("ymin").value);
+
+    const xmax =
+    parseInt(document.getElementById("xmax").value);
+
+    const ymax =
+    parseInt(document.getElementById("ymax").value);
+
+    // dibujar viewport
+    dibujarViewport(
+        xmin, 
+        ymin,
+        xmax, 
+        ymax);
+
+        //obtener escena actual
     const linea = escenas[escenaActual];
+    // dibujar linea original
+    dibujarLinea(linea.x1, linea.y1, linea.x2, linea.y2, "gray");
 
-    dibujarLinea(linea.x1, linea.y1, linea.x2, linea.y2);
+    //recorte
+    cohenSutherland(
+        linea.x1,
+        linea.y1,
+        linea.x2,
+        linea.y2,
+        xmin,
+        ymin,
+        xmax,
+        ymax
+    );
 }
 
 
@@ -211,11 +251,3 @@ function anteriorEscena(){
 }
 
 renderizar();
-
-//dibujarLinea(linea.x1, linea.y1, linea.x2, linea.y2);
-cohenSutherland(
-    linea.x1,
-    linea.y1,
-    linea.x2,
-    linea.y2,
-);
