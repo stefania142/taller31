@@ -15,9 +15,8 @@ const escenas = [
 let escenaActual = 0;
 
 function convertirY(y){
-    return y;
+    return canvas.height - y;
 }
-
 
 function plot(x, y){
 
